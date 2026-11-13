@@ -1,0 +1,20 @@
+{
+  "name": "ro-survivors-bot-gui",
+  "productName": "RO Survivors Bot",
+  "version": "1.1.0",
+  "description": "RO Survivors bot control center — the game runs inside the app, isolated from your normal browser",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^33.4.11"
+  },
+  "dependencies": {
+    "playwright-core": "^1.62.1"
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
+  }
+}

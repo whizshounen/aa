@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://ro-survivors.com http://127.0.0.1:*; connect-src 'self' http://127.0.0.1:*" />
+<title>RO Survivors Bot</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- the docked game view is a native layer over this area -->
+  <div id="stage">
+    <div class="stage-note">game window</div>
+    <!-- headless farm preview: one cell per account, refreshed every 5s -->
+    <div id="previews" class="hidden"></div>
+    <!-- live inventory of every headless instance -->
+    <div id="inventory" class="hidden"></div>
+  </div>
+
+  <aside id="panel">
+    <div id="srv-banner" class="hidden"></div>
+    <header id="bar">
+      <div>
+        <div class="brand">RO Survivors <span>bot</span></div>
+        <div id="status" class="pill idle">idle</div>
+      </div>      <div class="bar-actions">
+        <button id="btn-focus" class="icon" title="Give the game window keyboard focus">focus</button>
+        <button id="btn-settings" class="icon" title="Settings — saved logins, builds">Settings</button>
+        <button id="btn-reload" class="icon" title="Reload the game window">↻</button>
+      </div>
+    </header>
+
+    <div id="scroll">
+      <section class="block">
+        <h2>Session</h2>
+        <div class="seg" id="seg-session">
+          <button data-mode="account" class="on">Signed-in account</button>
+          <button data-mode="guest">Guest profile</button>
+        </div>
+        <p class="hint" id="session-hint">Uses the account already signed in in the game window. Nothing is logged out.</p>
+
+        <div class="row">
+          <button id="btn-detect" class="ghost">Detect characters</button>
+        </div>
+        <div id="chars" class="chars"><span class="empty">not detected yet</span></div>
+        <p class="hint">Click a character to set the job it runs as. The bot plays whichever character matches the Job below.</p>
+      </section>
+
+      <section class="block">
+        <h2>Expedition</h2>
+        <div class="seg" id="seg-mode">
+          <button data-mode="window" class="on">Game window</button>
+          <button data-mode="multi">Headless accounts</button>
+        </div>
+        <p class="hint" id="mode-hint">One bot drives the game window docked in this app.</p>
+        <div class="grid">
+          <label class="field">
+            <span>Job</span>
+            <select id="f-job">
+              <option value="mage">Mage</option>
+              <option value="swordsman">Swordsman</option>
+              <option value="archer">Archer</option>
+              <option value="acolyte">Acolyte</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Stage</span>
+            <select id="f-stage">
+              <option value="prontera">Prontera Fields</option>
+              <option value="sewer">Culverts</option>
+              <option value="sunken">Sunken Ship</option>
+              <option value="byalan">Byalan Island</option>
+              <option value="payon_forest">Payon Forest</option>
+              <option value="payon_cave">Payon Cave</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Lobby</span>
+            <select id="f-lobby">
+              <option>Asgard</option><option>Midgard</option><option>Alfheim</option>
+              <option>Vanaheim</option><option>Jotunheim</option><option selected>Nidavellir</option>
+              <option>Svartalfheim</option><option>Niflheim</option><option>Muspelheim</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Max seconds / run</span>
+            <input id="f-max" type="number" min="60" max="7200" step="60" value="3600" />
+          </label>
+          <label class="field">
+            <span>Runs (max)</span>
+            <input id="f-runs" type="number" min="1" max="99" value="1" />
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Objectives <em>keep running until these drop</em></span>
+          <input id="f-objectives" placeholder="Drake Card, Ghostring Card" spellcheck="false" />
+        </label>
+
+        <label class="switch">
+          <input id="f-maxloot" type="checkbox" checked />
+          <span>Max loot — all difficulty sliders at max (Loot ×2)</span>
+        </label>
+        <label class="switch">
+          <input id="f-ladder" type="checkbox" />
+          <span>Ladder — after a Prontera clear, continue to Culverts → Sunken</span>
+        </label>
+        <div id="multi-fields" class="hidden">
+          <label class="switch">
+            <input id="f-same-area" type="checkbox" checked />
+            <span>All bots use the panel's stage and lobby</span>
+          </label>
+          <label class="field">
+            <span>Instances (headless browsers) — uses the first N accounts</span>
+            <input id="f-instances" type="number" min="1" max="10" value="1" />
+          </label>
+          <label class="switch">
+            <input id="f-party" type="checkbox" />
+            <span>Party up — the bots travel together (needs the game's online lobby)</span>
+          </label>
+          <p class="hint" id="multi-hint">No accounts saved yet — add them in Settings → Accounts.</p>
+        </div>
+      </section>
+
+      <section class="block">
+        <h2>Presets</h2>
+        <div class="row tight">
+          <input id="f-preset" placeholder="preset name" spellcheck="false" />
+          <button id="btn-save" class="ghost">Save</button>
+        </div>
+        <div id="presets" class="presets"><span class="empty">none saved</span></div>
+      </section>
+    </div>
+
+    <div id="runbar">
+      <button id="btn-start" class="primary">Start</button>
+      <button id="btn-stop" class="danger" disabled>Stop</button>
+      <button id="btn-kill" class="danger small" disabled title="Force kill the engine and the bot (Stop is the clean way)">Force kill</button>
+    </div>
+
+    <section id="logwrap">
+      <div class="loghead"><span>log</span><button id="btn-clear" class="icon small">clear</button></div>
+      <div id="log"></div>
+    </section>
+
+    <footer id="foot"></footer>
+  </aside>
+
+  <!-- Settings: separate page, opened from the gear. Keeps the main panel to run controls only. -->
+  <div id="settings" class="hidden">
+    <div class="sheet">
+      <header>
+        <h2>Settings</h2>
+        <button id="btn-settings-close" class="icon" title="Close">✕</button>
+      </header>
+      <div class="sheet-body">
+        <div class="group">
+          <h3>Game account</h3>
+          <p class="hint">Stored on this PC once, then used automatically — you never type it again.</p>
+          <label class="field">
+            <span>Username</span>
+            <input id="f-user" placeholder="account username" spellcheck="false" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input id="f-pass" type="password" placeholder="leave blank to keep the saved one" autocomplete="off" />
+          </label>
+          <label class="switch">
+            <input id="f-remember" type="checkbox" checked />
+            <span>Sign in automatically when the app opens</span>
+          </label>
+          <div class="row tight">
+            <button id="btn-save-acct" class="primary">Save</button>
+            <button id="btn-forget" class="ghost">Forget account</button>
+          </div>
+          <p class="hint" id="acct-hint">Nothing saved yet.</p>
+        </div>
+        <div class="group">
+          <h3>Accounts for the headless farm</h3>
+          <p class="hint">Each account runs its own headless browser. The sign-in is cached per account after the first run.</p>
+          <div id="accounts" class="accounts"><span class="empty">none saved</span></div>
+          <div class="row tight" style="margin-top:8px">
+            <input id="acc-user" placeholder="username" spellcheck="false" />
+            <input id="acc-pass" type="password" placeholder="password" autocomplete="off" />
+            <button id="btn-acc-add" class="primary">Add</button>
+          </div>
+          <div class="row tight" style="margin-top:6px">
+            <select id="acc-job">
+              <option value="">job: from the panel</option>
+              <option value="mage">Mage</option>
+              <option value="swordsman">Swordsman</option>
+              <option value="archer">Archer</option>
+              <option value="acolyte">Acolyte</option>
+            </select>
+            <span id="acc-area-fields" class="hidden">
+              <input id="acc-char" placeholder="character name (for parties)" spellcheck="false" />
+              <select id="acc-lobby">
+                <option value="">lobby: from the panel</option>
+                <option>Asgard</option><option>Midgard</option><option>Alfheim</option>
+                <option>Vanaheim</option><option>Jotunheim</option><option>Nidavellir</option>
+                <option>Svartalfheim</option><option>Niflheim</option><option>Muspelheim</option>
+              </select>
+              <select id="acc-stage">
+                <option value="">stage: from the panel</option>
+                <option value="prontera">Prontera Fields</option>
+                <option value="sewer">Culverts</option>
+                <option value="sunken">Sunken Ship</option>
+                <option value="byalan">Byalan Island</option>
+                <option value="payon_forest">Payon Forest</option>
+                <option value="payon_cave">Payon Cave</option>
+              </select>
+            </span>
+            <button id="btn-acc-save" class="ghost">Save all</button>
+          </div>
+          <p class="hint" id="acc-area-hint">Tick "All bots use the panel's stage and lobby" in Expedition to give each account its own area.</p>
+          <p class="hint" id="accounts-hint"></p>
+        </div>
+        <div class="group">
+          <h3>Build — card &amp; item priority</h3>
+          <p class="hint">One entry per line, top = highest priority. Entries match by name substring (case-insensitive). Listed picks are taken in your order; anything not listed falls back to the bot's own planner. Lists boost, they never ban.</p>
+          <div class="seg" id="seg-job">
+            <button data-job="mage" class="on">Mage</button>
+            <button data-job="swordsman">Swordsman</button>
+            <button data-job="archer">Archer</button>
+            <button data-job="acolyte">Acolyte</button>
+          </div>
+          <label class="field">
+            <span>Card / skill priority — <em id="build-job-label">mage</em></span>
+            <textarea id="f-build-cards" rows="6" spellcheck="false" placeholder="Fire Bolt&#10;Deity"></textarea>
+          </label>
+          <label class="field">
+            <span>Item priority</span>
+            <textarea id="f-build-items" rows="6" spellcheck="false" placeholder="Apple&#10;Bulwark"></textarea>
+          </label>
+          <div class="row tight">
+            <button id="btn-save-build" class="primary">Save build</button>
+            <button id="btn-clear-build" class="ghost">Clear this job</button>
+          </div>
+          <p class="hint" id="build-hint"></p>
+        </div>
+        <div class="group">
+          <h3>App</h3>
+          <p class="hint" id="about"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "mode": "guest",
+  "job": "mage",
+  "stage": "payon_cave",
+  "lobby": "Nidavellir",
+  "objectives": [],
+  "runs": 1,
+  "maxSeconds": 3600,
+  "maxLoot": true,
+  "ladder": false,
+  "out": "logs"
+}

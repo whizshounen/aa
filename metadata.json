@@ -1,0 +1,8 @@
+{
+  "name": "RO Survivors Bot Control Center",
+  "description": "Expedition orchestration, tactical steering lab, phase-aware build planner, and bundle diagnostics for RO Survivors automation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "name": "main-Dq84ileb.js",
+  "srcSha": "0855c1373486a62030b2720ba185525b12348d0f4d7acde022c3492dd6d6b061",
+  "patchedSha": "426870cadae10fe9fc15c083624d52049c663a7b2fd933fd431470aa9bd20bc5",
+  "anchors": {
+    "run": "z",
+    "plaza": "re",
+    "char": "e",
+    "equip": "sa",
+    "items": "we",
+    "assets": "ne"
+  },
+  "at": 1794564198096
+}
